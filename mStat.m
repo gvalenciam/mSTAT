@@ -1430,9 +1430,17 @@ if(file == 0)
     %No action
 else
     %Create geovector with coordinates as vector (output file of type Point)
-    geoInflectionPoints = geoshape(handles.geovar.inflectionPts(:,2), handles.geovar.inflectionPts(:,1));
-    geoInflectionPoints.Geometry = 'point';
-    shapewrite(geoInflectionPoints, strcat(path, file));
+    Data = struct([]) ;  % initilaize structure 
+    for i = 1:length(handles.geovar.inflectionPts(:,1))
+        Data(i).Geometry = 'Point'; 
+        Data(i).Lat = handles.geovar.inflectionPts(i,2);  % latitude 
+        Data(i).Lon = handles.geovar.inflectionPts(i,1);  % longitude 
+        Data(i).Latitude = handles.geovar.inflectionPts(i,2);  % latitude attribute
+        Data(i).Longitude = handles.geovar.inflectionPts(i,1);  % longitude attribute
+        Data(i).ID  = i;  
+    end
+    shapewrite(Data, strcat(path, file))
+
 end
 
 waitbar(1, hwait);
@@ -1454,9 +1462,17 @@ if(file == 0)
     %No action
 else
     %Create geovector with coordinates as vector (output file of type Point)
-    geoMaxCurvaturePoints = geoshape(handles.geovar.newMaxCurvY, handles.geovar.newMaxCurvX);
-    geoMaxCurvaturePoints.Geometry = 'point';
-    shapewrite(geoMaxCurvaturePoints, strcat(path, file));
+    Data = struct([]) ;  % initilaize structure 
+    for i = 1:length(handles.geovar.newMaxCurvX)
+        Data(i).Geometry = 'Point'; 
+        Data(i).Lat = handles.geovar.newMaxCurvY(i);  % latitude 
+        Data(i).Lon = handles.geovar.newMaxCurvX(i);  % longitude 
+        Data(i).Latitude = handles.geovar.newMaxCurvY(i);  % latitude attribute
+        Data(i).Longitude = handles.geovar.newMaxCurvX(i);  % longitude attribute
+        Data(i).ID  = i;  
+    end
+    shapewrite(Data, strcat(path, file))
+    
 end
 
 waitbar(1, hwait);

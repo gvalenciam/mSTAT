@@ -1365,7 +1365,7 @@ disp(length(bend));
 hwait = waitbar(0,'Exporting bends...');
 
 %Open save file window (only shp file format for now)
-[file,path] = uiputfile('*.shp', 'Save bends information', 'bend.shp');
+[file,path] = uiputfile('*.shp', 'Save bends information', 'mstat_bend.shp');
 split = strsplit(file, '.');
 ls = length(bend) - 1;
 
@@ -1415,5 +1415,63 @@ else
 end
 
 
+% --------------------------------------------------------------------
+function export_inflection_points_Callback(hObject, eventdata, handles)
+% hObject    handle to export_inflection_points (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%Open save file window (only shp file format for now)
+[file,path] = uiputfile('*.shp', 'Save inflection points', 'mstat_inflection.shp');
+
+hwait = waitbar(0,'Exporting inflection points...');
+
+if(file == 0)
+    %No action
+else
+    %Create geovector with coordinates as vector (output file of type Point)
+    Data = struct([]) ;  % initilaize structure 
+    for i = 1:length(handles.geovar.inflectionPts(:,1))
+        Data(i).Geometry = 'Point' ; 
+        Data(i).Lat = handles.geovar.inflectionPts(i,2);  % latitude 
+        Data(i).Lon = handles.geovar.inflectionPts(i,1);  % longitude 
+        Data(i).Latitude = handles.geovar.inflectionPts(i,2);  % latitude attribute
+        Data(i).Longitude = handles.geovar.inflectionPts(i,1);  % longitude attribute
+        Data(i).ID  = i;  
+    end
+    shapewrite(Data, strcat(path, file))
+
+end
+
+waitbar(1, hwait);
+delete(hwait);
 
 
+% --------------------------------------------------------------------
+function export_max_curvature_points_Callback(hObject, eventdata, handles)
+% hObject    handle to export_max_curvature_points (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%Open save file window (only shp file format for now)
+[file,path] = uiputfile('*.shp', 'Save max curvature points', 'mstat_max_curvature.shp');
+
+hwait = waitbar(0,'Exporting max curvature points...');
+
+if(file == 0)
+    %No action
+else
+    %Create geovector with coordinates as vector (output file of type Point)
+    Data = struct([]) ;  % initilaize structure 
+    for i = 1:length(handles.geovar.newMaxCurvX)
+        Data(i).Geometry = 'Point' ; 
+        Data(i).Lat = handles.geovar.newMaxCurvY;  % latitude 
+        Data(i).Lon = handles.geovar.newMaxCurvX;  % longitude 
+        Data(i).Latitude = handles.geovar.newMaxCurvY;  % latitude attribute
+        Data(i).Longitude = handles.geovar.newMaxCurvX;  % longitude attribute
+        Data(i).ID  = i;  
+    end
+end
+
+waitbar(1, hwait);
+delete(hwait);
