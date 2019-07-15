@@ -68,7 +68,7 @@ end
 
 %--------------------------------------------------------------------------
 
-function mStat_OpeningFcn(hObject, eventdata, handles, varargin)
+function mStat_OpeningFcn(hObject, ~, handles, varargin)
 %      This function executes just before mStat is made 
 %      visible.  This function has no output arguments (see OutputFcn), 
 %      however, the following input arguments apply.  
@@ -80,21 +80,6 @@ set(handles.figure1,'Name',['Meander Statistics Toolbox (MStaT) ' handles.mStat_
     'DockControls','off')
 
 set_enable(handles,'init')
-
-% Draw the mstat Background
-% -----------------
-% pos = get(handles.mStatBackground,'position');
-% axes(handles.mStatBackground);
-% % if ~isdeployed 
-%     X = imread('MStaT_background.png');
-%     imdisp(X,'size',[pos(4) pos(3)]) % Avoids problems with users not having Image Processing TB
-% % else
-% %     X = imread('MStaT_background.jpg');
-% %     X = imresize(X, [pos(4) pos(3)]);
-% %     X = uint8(X);
-% %     imshow(X,'Border','tight')
-% % end
-% uistack(handles.mStatBackground,'bottom')
 axes(handles.pictureReach); 
 
 %data cursor type
@@ -103,7 +88,6 @@ dcm_obj = datacursormode(gcf);
 set(dcm_obj,'UpdateFcn',@mStat_myupdatefcn);
 
 set(dcm_obj,'Displaystyle','Window','Enable','on');
-pos = get(0,'userdata');
 
 %%%%%%%%%
 %scalebar
@@ -117,35 +101,29 @@ pos = get(0,'userdata');
         'LETs START!!!'};
     statusLogging(handles.LogWindow, log_text)
 handles.start=1;
-guidata(hObject, handles);%      Updates handles structure.
+
+% Updates handles structure.
+guidata(hObject, handles);
 
 %--------------------------------------------------------------------------
 
-function varargout = mStat_OutputFcn(hObject, eventdata, handles)
+function varargout = mStat_OutputFcn(~, ~, handles)
 %      Output arguments from this function are returned to the command line. 
 %      Input arguments from this function are defined as below.  
 %
 varargout{1} = handles.output;
 
 % --- Executes when figure1 is resized.
-function figure1_ResizeFcn(hObject, eventdata, handles)
-pos = get(handles.mStatBackground,'position');
- axes(handles.mStatBackground);
-% if ~isdeployed 
-   X = imread('MStaT_background.png');
-   imdisp(X,'size',[pos(4) pos(3)]) % Avoids problems with users not having Image Processing TB
-% else
-%    X = imread('MStaT_background.jpg');
-%    X = imresize(X, [pos(4) pos(3)]);
-%    X = uint8(X);
-%    imshow(X,'Border','tight')
-% end
+function figure1_ResizeFcn(~, ~, handles)
 
-%axes(handles.pictureReach);
-%uistack(handles.mStatBackground,'bottom')
+pos = get(handles.mStatBackground,'position');
+axes(handles.mStatBackground);
+
+X = imread('MStaT_background.png');
+imdisp(X,'size',[pos(4) pos(3)]);
 
 % --- Executes when user attempts to close figure1.
-function figure1_CloseRequestFcn(hObject, eventdata, handles)
+function figure1_CloseRequestFcn(hObject, ~, ~)
 % Hint: delete(hObject) closes the figure
 close_button = questdlg(...
     'You are about to exit MStaT. Any unsaved work will be lost. Are you sure?',...
@@ -165,38 +143,17 @@ end
 %%%%%%%%%%%%%%%%
 
 % -------------------------------------------------------------------------
-function file_Callback(hObject, eventdata, handles)
+function file_Callback(~, ~, ~)
 %Empty
 
 % -------------------------------------------------------------------------
-function newproject_Callback(hObject, eventdata, handles)
-%New project function
-axes(handles.pictureReach)
-cla(handles.pictureReach)
-clear handles.geovar
-clc
+function openfunction_Callback(hObject, ~, handles)
 
-% Push messages to Log Window:
-% ----------------------------
-log_text = {...
-            '';...
-            ['%--- ' datestr(now) ' ---%'];...
-            'NEW PROJECT!'};
-            statusLogging(handles.LogWindow, log_text)
-                
-set_enable(handles,'init')
-
-
-% -------------------------------------------------------------------------
-function openfunction_Callback(hObject, eventdata, handles)
 %Open function
-set_enable(handles,'init')
+set_enable(handles,'init');
 
 %This function incorporate the initial data input
 multisel='on';
-
-%Empty file flag
-emptyFiles = 0;
 
 persistent lastPath 
 % If this is the first time running the function this session,
@@ -206,13 +163,13 @@ if isempty(lastPath)
 end
 
 %River Average Width input mode (Comment and uncomment test)
-flagAverageWidth = "manual";
-%flagAverageWidth = "auto";
+flagAverageWidth = 'manual';
+%flagAverageWidth = 'auto';
 handles.flagAverageWidth = flagAverageWidth;
 
 %mSTAT plot flag (Comment and uncomment test)
-%handles.plotFlag = "no_plot";
-handles.plotFlag = "plot";
+%handles.plotFlag = 'no_plot';
+handles.plotFlag = 'plot';
 
 %Save variables in handles
 guidata(hObject, handles);
@@ -221,48 +178,15 @@ guidata(hObject, handles);
 
 handles.File = ReadVar.File;
 
-% assignin('base','xCoord',ReadVar.xCoord);
-% assignin('base','yCoord',ReadVar.yCoord);
-% assignin('base','width',ReadVar.width);
-
 % Use the path to the last selected file
 % If 'uigetfile' is called, but no item is selected, 'lastPath' is not overwritten with 0
 if ReadVar.Path ~= 0
     lastPath = ReadVar.Path;
 end
-
-if (ReadVar.numfile > 1)
-    
-    for i=1:ReadVar.numfile
-        
-        if ReadVar.File{i} == 0 %empty file
-        
-            emptyFiles = 1;
-            
-        end
-    
-    end
-    
-else
-    
-    if ReadVar.File == 0 %empty file
-        
-        emptyFiles = 1;
-        
-    end
-end
   
-if emptyFiles == 1
-    
-else
-
-    % Push messages to Log Window:
-    % ----------------------------
-%     log_text = {...
-%                 '';...
-%                 ['%--- ' datestr(now) ' ---%'];...
-%                 'File Loaded:';[cell2mat({ReadVar.File})]};
-%                 statusLogging(handles.LogWindow, log_text)
+if ReadVar.File == 0
+    %No action
+else            
     
     %Name of files selected saved to handles
     handles.numFile = ReadVar.numfile;
@@ -282,19 +206,16 @@ else
     %Multifile option
     if (ReadVar.numfile > 1)
         
-        for i=1:ReadVar.numfile
+        for i = 1:ReadVar.numfile
             
             handles.xCoord{i} = ReadVar.xCoord{i}(:);
             handles.yCoord{i} = ReadVar.yCoord{i}(:);
             handles.formatfileread{i} = ReadVar.comp{i};
+            
             %For this mode width value is assigned automatically from the input file
             handles.width{i} = ReadVar.width{i};            
             guidata(hObject, handles);
             set_enable(handles,'loadfiles');
-            
-            %Write and store the width
-            %set(handles.widthinput{i}, 'String', handles.width{i});
-            %setappdata(0,'width', handles.width{i});
             
             %Read selector (Method of calculate Infletion or valley line)
             sel = get(handles.selector,'Value');
@@ -314,7 +235,7 @@ else
             
         end
         
-        for i=1:handles.numFile
+        for i = 1:handles.numFile
         
             tableValues = [cell2mat({handles.geovar{i}.nBends}), cell2mat({round(nanmean(handles.geovar{i}.sinuosityOfBends),2)}), cell2mat({round(nanmean(handles.geovar{i}.lengthCurved),2)}), cell2mat({round(nanmean(handles.geovar{i}.wavelengthOfBends),2)}), cell2mat({round(nanmean(handles.geovar{i}.amplitudeOfBends),2)})];
             tableHeaders = ["numberBends", "Sinuosity", "Arc_Wavelength", "Wavelength", "Amplitude"];
@@ -345,16 +266,16 @@ else
         guidata(hObject, handles);
         set_enable(handles,'loadfiles') 
         
-        if (strcmp(flagAverageWidth, "auto") == 1)
+        if (strcmp(flagAverageWidth, 'auto') == 1)
             handles.width = ReadVar.width;
-        elseif (strcmp(flagAverageWidth, "manual") == 1)
+        elseif (strcmp(flagAverageWidth, 'manual') == 1)
             % Input the average width of channel
             x = newid('Channel average width [meters]:', 'MStaT', [1 50]);
-            handles.width = str2num(x{:}); 
+            handles.width = str2double(x{:}); 
         else
             %Default
             x = newid('Channel average width [meters]:', 'MStaT', [1 50]);
-            handles.width = str2num(x{:}); 
+            handles.width = str2double(x{:}); 
         end
         
         %Control the average width input
@@ -424,14 +345,14 @@ end
     
 
 % --------------------------------------------------------------------
-function close_Callback(hObject, eventdata, handles)
+function close_Callback(~, ~, ~)
 close
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Export function
 
 % --------------------------------------------------------------------
-function exportfunction_Callback(hObject, eventdata, handles)
+function exportfunction_Callback(~, ~, ~)
 %Empty
 
 %Matlab Export
@@ -446,22 +367,18 @@ log_text = {...
             ['%--- ' datestr(now) ' ---%'];...
             'Export .mat Filesuccesfully!'};
             statusLogging(handles.LogWindow, log_text)
-            
+                  
+function saveDataCallback(~, ~, handles)
 
-           
-
-function saveDataCallback(hObject, eventdata, handles)
 hwait = waitbar(0,'Exporting .mat File...');
-
 [handles.FileName,handles.PathName] = uiputfile('*.mat','Save .mat file');
 
-Parameters.PathFileName  = fullfile(handles.PathName,handles.FileName);                           
-Parameters.geovar = handles.geovar;
 waitbar(0.5,hwait)
 
 save([handles.PathName handles.FileName], 'Parameters');
             
 waitbar(1,hwait)
+
 delete(hwait)
 
 
@@ -479,16 +396,16 @@ log_text = {...
             'Export .xlsx File succesfully!'};
             statusLogging(handles.LogWindow, log_text)
             
-function savexlsDataCallback(hObject, eventdata, handles)
+function savexlsDataCallback(~, ~, handles)
 mStat_savexlsx(handles.geovar)
 
-function saveBendsData(hObject, eventdata, handles)
+function saveBendsData(~, ~, handles)
 mStat_saveBendsData(handles.geovar)
 
 
 %Google Export
 % --------------------------------------------------------------------
-function exportkmzfile_Callback(hObject, eventdata, handles)
+function exportkmzfile_Callback(~, ~, handles)
 %This function esport the kmzfile for Google Earth
 
 [file,path] = uiputfile('*','Save .kml File');
@@ -501,17 +418,22 @@ namekml=(fullfile(path,file));
 latlon1=[xcoord ycoord];
 
 %second
-for i=1:length(handles.geovar.xValleyCenter)
-    utmzoneva(i,1)=cellstr(handles.utmzone(1,1:4));
-end
-utmva=char(utmzoneva);
 
-[xvalley,yvalley]=utm2deg(handles.geovar.xValleyCenter,handles.geovar.yValleyCenter,char(utmzoneva));
-latlon2=[xvalley yvalley];
+utmzoneva = zeros(length(handles.geovar.xValleyCenter), 1);
+
+for i=1:length(handles.geovar.xValleyCenter)
+    utmzoneva(i,1) = cellstr(handles.utmzone(1,1:4));
+end
+
+[xvalley,yvalley] = utm2deg(handles.geovar.xValleyCenter,handles.geovar.yValleyCenter,char(utmzoneva));
+latlon2 = [xvalley yvalley];
 
 %third
-for i=1:length(handles.geovar.inflectionX)
-    utmzoneinf(i,1)=cellstr(handles.utmzone(1,1:4));
+
+utmzoneinf = zeros(length(handles.geovar.inflectionX), 1);
+
+for i = 1:length(handles.geovar.inflectionX)
+    utmzoneinf(i,1) = cellstr(handles.utmzone(1,1:4));
 end
 
 [xinflectionY,yinflectionY]=utm2deg(handles.geovar.inflectionX,handles.geovar.inflectionY,char(utmzoneinf));
@@ -532,7 +454,7 @@ log_text = {...
 
 %Export Figures    
 % --------------------------------------------------------------------
-function exportfiguregraphics_Callback(hObject, eventdata, handles)
+function exportfiguregraphics_Callback(~, ~, handles)
 %export figure function
 [file,path] = uiputfile('*.tif','Save .tif File');
 
@@ -552,46 +474,47 @@ log_text = {...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Tools
 % --------------------------------------------------------------------
-function tools_Callback(hObject, eventdata, handles)
+function tools_Callback(~, ~, ~)
 % Empty
 
 % --------------------------------------------------------------------
-function evaldecomp_Callback(hObject, eventdata, handles)
+function evaldecomp_Callback(~, ~, ~)
 % Empty
 
 % --------------------------------------------------------------------
-function waveletanalysis_Callback(hObject, eventdata, handles)
+function waveletanalysis_Callback(~, ~, handles)
 %Wavelet analysis
-geovar=handles.geovar;
+geovar = handles.geovar;
 handles.getWaveStats = mStat_WaveletAnalysis(geovar);
 
 
 % --------------------------------------------------------------------
-function riverstatistics_Callback(hObject, eventdata, handles)
+function riverstatistics_Callback(~, ~, handles)
 % This function executes when the user presses the getRiverStats button
 % and requires the following input arguments.
 handles.getRiverStats = mStat_StatisticsVariables(handles);
 
 
 % --------------------------------------------------------------------
-function migrationanalyzer_Callback(hObject, eventdata, handles)
+function migrationanalyzer_Callback(~, ~, ~)
 %Migration Analyzer Tool
 mStat_MigrationAnalyzer;
 
 % --------------------------------------------------------------------
-function confluencesanalyzer_Callback(hObject, eventdata, handles)
+function confluencesanalyzer_Callback(~, ~, ~)
 %Confluences and Bifurcation Tools
 mStat_ConfluencesAnalyzer;
 
 
 % --------------------------------------------------------------------
-function backgroundimage_Callback(hObject, eventdata, handles)
+function backgroundimage_Callback(hObject, ~, handles)
 % Add backgroud image
 [handles.FileImage,handles.PathImage] = uigetfile({'*.jpg';'*.tif';'*.*'},'Select Graphic File');
 guidata(hObject,handles)
 
-if handles.FileImage==0
+if handles.FileImage == 0
 else
+    
     axes(handles.pictureReach);
     hold on;
     mapshow(fullfile(handles.PathImage,handles.FileImage))
@@ -601,7 +524,7 @@ else
     handles.geovar.x0, handles.geovar.y0, handles.geovar.x_sim, handles.geovar.newMaxCurvX, handles.geovar.newMaxCurvY, ...
     handles.pictureReach);
 
-    msgbox(['Successfully update'],...
+    msgbox('Successfully update',...
         'Background Image');
         
 end
@@ -609,29 +532,31 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Settings
 % --------------------------------------------------------------------
-function setti_Callback(hObject, eventdata, handles)
+function setti_Callback(~, ~, ~)
 % Empty
 
 
 % --------------------------------------------------------------------
-function unitsfunction_Callback(hObject, eventdata, handles)
+function unitsfunction_Callback(~, ~, ~)
 % Empty
 
 
 % --------------------------------------------------------------------
-function metricunits_Callback(hObject, eventdata, handles)
+function metricunits_Callback(hObject, ~, handles)
+
 % Metric factor function
-if handles.start==0
-    munits=1/0.3048;
+if handles.start == 0
+    munits = 1/0.3048;
 else
-    munits=1;
+    munits = 1;
 end
-handles.geovar.lengthCurved=handles.geovar.lengthCurved*munits;
-handles.geovar.wavelengthOfBends=handles.geovar.wavelengthOfBends*munits;
-handles.geovar.amplitudeOfBends=handles.geovar.amplitudeOfBends*munits;
-handles.geovar.downstreamSlength=handles.geovar.downstreamSlength*munits;
-handles.geovar.upstreamSlength=handles.geovar.upstreamSlength*munits;
-handles.width=handles.width*munits;
+
+handles.geovar.lengthCurved = handles.geovar.lengthCurved*munits;
+handles.geovar.wavelengthOfBends = handles.geovar.wavelengthOfBends*munits;
+handles.geovar.amplitudeOfBends = handles.geovar.amplitudeOfBends*munits;
+handles.geovar.downstreamSlength = handles.geovar.downstreamSlength*munits;
+handles.geovar.upstreamSlength = handles.geovar.upstreamSlength*munits;
+handles.width = handles.width * munits;
 guidata(hObject,handles)
 
 set(handles.widthinput,'String',handles.width)
@@ -667,17 +592,17 @@ guidata(hObject, handles);
 
 
 % --------------------------------------------------------------------
-function englishunits_Callback(hObject, eventdata, handles)
+function englishunits_Callback(hObject, ~, handles)
+
 % English units
+eunits = 0.3048;
 
-eunits=0.3048;
-
-handles.geovar.lengthCurved=handles.geovar.lengthCurved*eunits;
-handles.geovar.wavelengthOfBends=handles.geovar.wavelengthOfBends*eunits;
-handles.geovar.amplitudeOfBends=handles.geovar.amplitudeOfBends*eunits;
-handles.geovar.downstreamSlength=handles.geovar.downstreamSlength*eunits;
-handles.geovar.upstreamSlength=handles.geovar.upstreamSlength*eunits;
-handles.width=handles.width*eunits;
+handles.geovar.lengthCurved = handles.geovar.lengthCurved*eunits;
+handles.geovar.wavelengthOfBends = handles.geovar.wavelengthOfBends*eunits;
+handles.geovar.amplitudeOfBends = handles.geovar.amplitudeOfBends*eunits;
+handles.geovar.downstreamSlength = handles.geovar.downstreamSlength*eunits;
+handles.geovar.upstreamSlength = handles.geovar.upstreamSlength*eunits;
+handles.width = handles.width * eunits;
 guidata(hObject,handles)
 
 set(handles.widthinput,'String',handles.width)
@@ -711,25 +636,26 @@ set(handles.ustreamL, 'String', round(handles.geovar.upstreamSlength(selectedBen
 handles.eunits=0.3048;
 guidata(hObject, handles);
     
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Help
 % --------------------------------------------------------------------
-function helpfunction_Callback(hObject, eventdata, handles)
+function helpfunction_Callback(~, ~, ~)
 % Empty
 
-
 % --------------------------------------------------------------------
-function usersguide_Callback(hObject, eventdata, handles)
+function usersguide_Callback(~, ~, ~)
+
 %Send to web page with code modufy to github
 try
     web('https://meanderstatistics.blogspot.com/p/tutorials.html')
-catch err %#ok<NASGU>
-	if isdeployed
+catch err 
+    
+    if isdeployed
+        
         errLogFileName = fullfile(pwd,...
             ['errorLog' datestr(now,'yyyymmddHHMMSS') '.txt']);
         msgbox({['An unexpected error occurred. Error code: ' err.identifier];...
-            ['Error details are being written to the following file: '];...
+            'Error details are being written to the following file: ';...
             errLogFileName},...
             'MStaT Status: Unexpected Error',...
             'error');
@@ -737,22 +663,29 @@ catch err %#ok<NASGU>
         fwrite(fid,err.getReport('extended','hyperlinks','off'));
         fclose(fid);
         rethrow(err)
+        
     else
+        
         msgbox(['An unexpected error occurred. Error code: ' err.identifier],...
             'MStaT Status: Unexpected Error',...
             'error');
         rethrow(err);
+        
     end
+    
 end
 
 
 % --------------------------------------------------------------------
-function checkforupdates_Callback(hObject, eventdata, handles)
+function checkforupdates_Callback(~, ~, ~)
+
 %Send to web page for updates
 try
     web('https://meanderstatistics.blogspot.com/p/download.html')
-catch err %#ok<NASGU>
-	if isdeployed
+catch err 
+    
+    if isdeployed
+        
         errLogFileName = fullfile(pwd,...
             ['errorLog' datestr(now,'yyyymmddHHMMSS') '.txt']);
         msgbox({['An unexpected error occurred. Error code: ' err.identifier];...
@@ -764,24 +697,28 @@ catch err %#ok<NASGU>
         fwrite(fid,err.getReport('extended','hyperlinks','off'));
         fclose(fid);
         rethrow(err)
+        
     else
+        
         msgbox(['An unexpected error occurred. Error code: ' err.identifier],...
             'MStaT Status: Unexpected Error',...
             'error');
         rethrow(err);
+        
     end
+    
 end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Initial Panel
 
-function widthinput_Callback(hObject, eventdata, handles)
+function widthinput_Callback(~, ~, ~)
 % Empty
 
 
 % --- Executes during object creation, after setting all properties.
-function widthinput_CreateFcn(hObject, eventdata, handles)
+function widthinput_CreateFcn(hObject, ~, ~)
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -790,7 +727,7 @@ end
 
 
 % --- Executes on button press in recalculate.
-function recalculate_Callback(hObject, eventdata, handles)
+function recalculate_Callback(hObject, ~, handles)
 %Recalculate using a New Width 
 
 % clear figures and data 
@@ -805,13 +742,13 @@ guidata(hObject,handles)
 handles.width = str2double(get(handles.widthinput,'String'));
 guidata(hObject,handles)
 
-%  Store width
+%Store width
 setappdata( 0,'width', handles.width)
 
 %Method selected
-sel=get(handles.selector,'Value');
+sel = get(handles.selector,'Value');
 
-Tools=1;%Geometry parameter
+Tools = 1;%Geometry parameter
 
 % Read the decompouse parameter
 level = str2double(get(handles.decompositionparameter,'String'));
@@ -830,18 +767,18 @@ log_text = {...
             '';...
             ['%--- ' datestr(now) ' ---%'];...
             'Summary';...
-            'Total Length Analyzed [km]:';[cell2mat({round((geovar.intS(end,1)/1000),2)})];...
-            'Bends Found:';[cell2mat({geovar.nBends})];...
-            'Mean Sinuosity:';[cell2mat({round(nanmean(geovar.sinuosityOfBends),2)})];...
-            'Mean Amplitude [m]:';[cell2mat({round(nanmean(geovar.amplitudeOfBends),2)})];...
-            'Mean Arc-Wavelength [m]:';[cell2mat({round(nanmean(geovar.lengthCurved),2)})];...
-            'Mean Wavelength[m]:';[cell2mat({round(nanmean(geovar.wavelengthOfBends),2)})]};
+            'Total Length Analyzed [km]:';cell2mat({round((geovar.intS(end,1)/1000),2)});...
+            'Bends Found:';cell2mat({geovar.nBends});...
+            'Mean Sinuosity:';cell2mat({round(nanmean(geovar.sinuosityOfBends),2)});...
+            'Mean Amplitude [m]:';cell2mat({round(nanmean(geovar.amplitudeOfBends),2)});...
+            'Mean Arc-Wavelength [m]:';cell2mat({round(nanmean(geovar.lengthCurved),2)});...
+            'Mean Wavelength[m]:';cell2mat({round(nanmean(geovar.wavelengthOfBends),2)})};
             statusLogging(handles.LogWindow, log_text)
                     
 set_enable(handles,'results')
 
 % --------------------------------------------------------------------
-function bendstatistics_Callback(hObject, eventdata, handles)
+function bendstatistics_Callback(hObject, ~, handles)
 % This function executes when the user presses the Get Bend panel 
 % button and requires the following input arguments.  
 %
@@ -883,11 +820,11 @@ uiresume(gcbf);
 
 
 % --- Executes on button press in selectData.
-function selectData_Callback(hObject, eventdata, handles)
+function selectData_Callback(~, ~, ~)
 %Empty
 
 
-function bendSelect_Callback(hObject, eventdata, handles)
+function bendSelect_Callback(hObject, ~, handles)
 % This function executes when the user presses the Get Bend Statistics 
 % button and requires the following input arguments.  
 
@@ -942,11 +879,11 @@ uiresume(gcbf);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Panel Selection
 % --- Executes during object creation, after setting all properties.
-function uipanelselect_CreateFcn(hObject, eventdata, handles)
+function uipanelselect_CreateFcn(~, ~, ~)
 %Empty
 
 
-function bendSelect_CreateFcn(hObject, eventdata, handles)
+function bendSelect_CreateFcn(hObject, ~, ~)
 
 if ispc && isequal(get(hObject,'BackgroundColor'), ...
         get(0,'defaultUicontrolBackgroundColor'))
@@ -955,31 +892,31 @@ end
 %--------------------------------------------------------------------------
 
 
-function selectData_CreateFcn(hObject, eventdata, handles)
+function selectData_CreateFcn(hObject, ~, ~)
 set(hObject,'enable','off')
 
 
 % --- Executes on selection change in selector.
-function selector_Callback(hObject, eventdata, handles)
+function selector_Callback(hObject, ~, handles)
 %This function select the bend and shows the parameters results
 axes(handles.pictureReach)
 cla(handles.pictureReach)
 guidata(hObject,handles)
 
 %Read selector
-sel=get(handles.selector,'Value');%1 Inflectionmethod or MCM
+sel = get(handles.selector,'Value');%1 Inflectionmethod or MCM
 
-Tools=1;%Geometry parameter
+Tools = 1;%Geometry parameter
 
 % Read the decompouse parameter
 level = str2double(get(handles.decompositionparameter,'String'));
 
 %Function of calculate
-[geovar]=mStat_planar(handles.xCoord,handles.yCoord,handles.width,sel,...
+[geovar] = mStat_planar(handles.xCoord,handles.yCoord,handles.width,sel,...
     handles.pictureReach,handles.bendSelect,Tools,level);
 
 %save handles
-handles.geovar=geovar;
+handles.geovar = geovar;
 guidata(hObject, handles);
 
 % Push messages to Log Window:
@@ -988,17 +925,17 @@ log_text = {...
         '';...
         ['%--- ' datestr(now) ' ---%'];...
         'Summary';...
-        'Total Length Analyzed [km]:';[cell2mat({round((geovar.intS(end,1)/1000),2)})];...
-        'Bends Found:';[cell2mat({geovar.nBends})];...
-        'Mean Sinuosity:';[cell2mat({round(nanmean(geovar.sinuosityOfBends),2)})];...
-        'Mean Amplitude [m]:';[cell2mat({round(nanmean(geovar.amplitudeOfBends),2)})];...
-        'Mean Arc-Wavelength[m]:';[cell2mat({round(nanmean(geovar.lengthCurved),2)})];...
-        'Mean Wavelength [m]:';[cell2mat({round(nanmean(geovar.wavelengthOfBends),2)})]};
+        'Total Length Analyzed [km]:';cell2mat({round((geovar.intS(end,1)/1000),2)});...
+        'Bends Found:';cell2mat({geovar.nBends});...
+        'Mean Sinuosity:';cell2mat({round(nanmean(geovar.sinuosityOfBends),2)});...
+        'Mean Amplitude [m]:';cell2mat({round(nanmean(geovar.amplitudeOfBends),2)});...
+        'Mean Arc-Wavelength[m]:';cell2mat({round(nanmean(geovar.lengthCurved),2)});...
+        'Mean Wavelength [m]:';cell2mat({round(nanmean(geovar.wavelengthOfBends),2)})};
         statusLogging(handles.LogWindow, log_text)
 
 
 % --- Executes during object creation, after setting all properties.
-function selector_CreateFcn(hObject, eventdata, handles)
+function selector_CreateFcn(hObject, ~, ~)
 
 % Hint: popupmenu controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
@@ -1009,7 +946,7 @@ end
 
 %--------------------------------------------------------------------------
 % --- Executes on button press in gobend.
-function gobend_Callback(hObject, eventdata, handles)
+function gobend_Callback(hObject, ~, handles)
 %This function go to bend selected and replot the picture
 
 cla(handles.pictureReach)
@@ -1021,13 +958,11 @@ mStat_plotplanar(handles.geovar.equallySpacedX, handles.geovar.equallySpacedY, h
 
 selectedBend = get(handles.bendSelect,'Value');
 
- if handles.geovar.amplitudeOfBends(selectedBend)~=0 || isfinite(handles.geovar.upstreamSlength)
+ if handles.geovar.amplitudeOfBends(selectedBend) ~= 0 || isfinite(handles.geovar.upstreamSlength)
     %      selectdata text labels for all bends.    
     axes(handles.pictureReach); 
     set(gca, 'Color', 'w')
     %axis normal; 
-    dx = 2000;
-    dy = 2000;
     loc = find(handles.geovar.newMaxCurvS == handles.geovar.bend(selectedBend,2));
     zoomcenter(handles.geovar.newMaxCurvX(loc),handles.geovar.newMaxCurvY(loc),10)
  else 
@@ -1048,11 +983,11 @@ guidata(hObject,handles)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Planar Parameters Display
-function sinuosity_Callback(hObject, eventdata, handles)
+function sinuosity_Callback(~, ~, ~)
 %Empty
 
 % --- Executes during object creation, after setting all properties.
-function sinuosity_CreateFcn(hObject, eventdata, handles)
+function sinuosity_CreateFcn(hObject, ~, ~)
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -1060,12 +995,12 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-function curvaturel_Callback(hObject, eventdata, handles)
+function curvaturel_Callback(~, ~, ~)
 %Empty
 
 
 % --- Executes during object creation, after setting all properties.
-function curvaturel_CreateFcn(hObject, eventdata, handles)
+function curvaturel_CreateFcn(hObject, ~, ~)
 
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
@@ -1074,12 +1009,12 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-function wavel_Callback(hObject, eventdata, handles)
+function wavel_Callback(~, ~, ~)
 % Empty
 
 
 % --- Executes during object creation, after setting all properties.
-function wavel_CreateFcn(hObject, eventdata, handles)
+function wavel_CreateFcn(hObject, ~, ~)
 
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
@@ -1088,12 +1023,12 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-function amplitude_Callback(hObject, eventdata, handles)
+function amplitude_Callback(~, ~, ~)
 % Empty
 
 
 % --- Executes during object creation, after setting all properties.
-function amplitude_CreateFcn(hObject, eventdata, handles)
+function amplitude_CreateFcn(hObject, ~, ~)
 
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
@@ -1106,37 +1041,37 @@ end
 %Extra Functions
 
 % --- Executes during object creation, after setting all properties.
-function condition_CreateFcn(hObject, eventdata, handles)
+function condition_CreateFcn(~, ~, ~)
 % Empty
 
 
 % --- Executes on mouse motion over figure - except title and menu.
-function figure1_WindowButtonMotionFcn(hObject, eventdata, handles)
+function figure1_WindowButtonMotionFcn(~, ~, ~)
 %Empty
 
 
 % --- Executes during object creation, after setting all properties.
-function IndividualStats_CreateFcn(hObject, eventdata, handles)
+function IndividualStats_CreateFcn(~, ~, ~)
 % Empty 
 
 
 % --- Executes on button press in withinflectionpoints.
-function withinflectionpoints_Callback(hObject, eventdata, handles)
+function withinflectionpoints_Callback(~, ~, ~)
 % Empty
 
 
 % --- Executes on button press in withvalleyline.
-function withvalleyline_Callback(hObject, eventdata, handles)
+function withvalleyline_Callback(~, ~, ~)
 % Empty
 
 
 % --- Executes during object creation, after setting all properties.
-function mStatBackground_CreateFcn(hObject, eventdata, handles)
+function mStatBackground_CreateFcn(~, ~, ~)
 %empty
 
 
 % --- Executes on mouse press over axes background.
-function pictureReach_ButtonDownFcn(hObject, eventdata, handles)
+function pictureReach_ButtonDownFcn(~, ~, handles)
 pan(handles.pictureReach)
 
 
@@ -1198,20 +1133,13 @@ end
        
 
 % --------------------------------------------------------------------
-function pictureReach_CreateFcn(hObject, eventdata, handles)
+function pictureReach_CreateFcn(~, ~, ~)
 %Empty
 
 
 % --------------------------------------------------------------------
-function pictureReach_DeleteFcn(hObject, eventdata, handles)
+function pictureReach_DeleteFcn(~, ~, ~)
 %Empty
-% 
-
-
-% % --------------------------------------------------------------------
-function Opengui_ClickedCallback(hObject, eventdata, handles)
-openfile_Callback(hObject, eventdata, handles)
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1221,12 +1149,12 @@ openfile_Callback(hObject, eventdata, handles)
 
 
 % --- Executes on selection change in LogWindow.
-function LogWindow_Callback(hObject, eventdata, handles)
+function LogWindow_Callback(~, ~, ~)
 % empty
 
 
 % --- Executes during object creation, after setting all properties.
-function LogWindow_CreateFcn(hObject, eventdata, handles)
+function LogWindow_CreateFcn(hObject, ~, ~)
 
 % Hint: listbox controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
@@ -1235,12 +1163,12 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-function decompositionparameter_Callback(hObject, eventdata, handles)
+function decompositionparameter_Callback(~, ~, ~)
 % empty
 
 
 % --- Executes during object creation, after setting all properties.
-function decompositionparameter_CreateFcn(hObject, eventdata, handles)
+function decompositionparameter_CreateFcn(hObject, ~, ~)
 
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
@@ -1325,14 +1253,19 @@ function export_bend_shapefiles_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+indexOfIntersectionPoints = zeros(1, length(handles.geovar.intS));
+bend = cell(1, length(indexOfIntersectionPoints) + 1);
+
 for i = 1:length(handles.geovar.intS)
+    
      v = handles.geovar.intS(i);
      [index, ~] = searchclosest(handles.geovar.sResample, v);
      
      if isnan(index)
      else
-     indexOfIntersectionPoints(i) = index; 
+        indexOfIntersectionPoints(i) = index; 
      end
+     
 end
 
 for i = 1:length(indexOfIntersectionPoints)
@@ -1349,46 +1282,37 @@ for i = 1:length(indexOfIntersectionPoints)
     
 end
 
-assignin('base','bend',bend);
-disp("BEND");
-disp(length(bend));
-
-% figure;
-% 
-% for j = 1:length(bend)
-%     
-%     plot(bend{j}(:,1), bend{j}(:,2));
-%     hold on;
-%     
-% end
+bend{length(indexOfIntersectionPoints) + 1} = [handles.geovar.equallySpacedX(indexOfIntersectionPoints(end):end) handles.geovar.equallySpacedY(indexOfIntersectionPoints(end):end)];
 
 hwait = waitbar(0,'Exporting bends...');
 
 %Open save file window (only shp file format for now)
 [file,path] = uiputfile('*.shp', 'Save bends information', 'mstat_bend.shp');
-split = strsplit(file, '.');
-ls = length(bend) - 1;
 
 waitbar(1/3, hwait);
 
 if(file == 0)
     %No action
 else
-    
-    
+     
     geoStruct = struct('ID', 0, 'Geometry', 0, 'Lat', 0, 'Lon', 0, 'Sinuosity', 0, 'Arc_Wavelength', 0, 'Amplitude', 0);
-    geoStruct = repmat(geoStruct, length(bend) - 1, 1);
+    geoStruct = repmat(geoStruct, length(bend), 1);
     
     %Populate Geostruct
-    [geoStruct(1:ls).Geometry]  = deal('Line');
-    
-    for i = 1:length(bend) - 1
-        geoStruct(i).ID                 = length(bend) - handles.geovar.bendID1(i);
-        geoStruct(i).Lat                = bend{i}(:,2);
-        geoStruct(i).Lon                = bend{i}(:,1);
-        geoStruct(i).Sinuosity          = handles.geovar.sinuosityOfBends(i);
-        geoStruct(i).Arc_Wavelength     = handles.geovar.lengthCurved(i);
-        geoStruct(i).Amplitude          = handles.geovar.amplitudeOfBends(i);
+    [geoStruct(1:length(bend)).Geometry]  = deal('Line');
+
+    for i = 0:length(handles.geovar.sinuosityOfBends) - 1
+         
+        geoStruct(i+1).Sinuosity          = handles.geovar.sinuosityOfBends(i+1);
+        geoStruct(i+1).Arc_Wavelength     = handles.geovar.lengthCurved(i+1);
+        geoStruct(i+1).Amplitude          = handles.geovar.amplitudeOfBends(i+1);
+          
+    end
+      
+    for j = 0:length(bend) - 1
+        geoStruct(j+1).ID = length(bend) - j;
+        geoStruct(j+1).Lat                = bend{end-j}(:,2);
+        geoStruct(j+1).Lon                = bend{end-j}(:,1);
     end
     
     waitbar(2/3, hwait);
@@ -1398,19 +1322,6 @@ else
     
     waitbar(1, hwait);
     delete(hwait);
-    
-%     for j = 1:length(bend) - 1
-%         disp(j);
-%         %Create geovector with coordinates as vector (output file of type LINE)
-%         geoPointVectorBend = geoshape(bend{j}(:,1), bend{j}(:,2));
-%         geoPointVectorBend.Geometry = 'line';
-%         geoPointVectorBend.sinuosity = handles.geovar.sinuosityOfBends(j);
-%         geoPointVectorBend.arcwavelength = handles.geovar.lengthCurved(j);
-%         geoPointVectorBend.amplitude = handles.geovar.amplitudeOfBends(j);
-%         fileName = strcat(strcat(split(1), num2str(j)), ".shp");
-%         shapewrite(geoPointVectorBend, strcat(path, fileName));
-% 
-%     end
     
 end
 
@@ -1432,7 +1343,7 @@ else
     %Create geovector with coordinates as vector (output file of type Point)
     Data = struct([]) ;  % initilaize structure 
     for i = 1:length(handles.geovar.inflectionPts(:,1))
-        Data(i).Geometry = 'Point' ; 
+        Data(i).Geometry = 'Point'; 
         Data(i).Lat = handles.geovar.inflectionPts(i,2);  % latitude 
         Data(i).Lon = handles.geovar.inflectionPts(i,1);  % longitude 
         Data(i).Latitude = handles.geovar.inflectionPts(i,2);  % latitude attribute
@@ -1464,13 +1375,15 @@ else
     %Create geovector with coordinates as vector (output file of type Point)
     Data = struct([]) ;  % initilaize structure 
     for i = 1:length(handles.geovar.newMaxCurvX)
-        Data(i).Geometry = 'Point' ; 
-        Data(i).Lat = handles.geovar.newMaxCurvY;  % latitude 
-        Data(i).Lon = handles.geovar.newMaxCurvX;  % longitude 
-        Data(i).Latitude = handles.geovar.newMaxCurvY;  % latitude attribute
-        Data(i).Longitude = handles.geovar.newMaxCurvX;  % longitude attribute
+        Data(i).Geometry = 'Point'; 
+        Data(i).Lat = handles.geovar.newMaxCurvY(i);  % latitude 
+        Data(i).Lon = handles.geovar.newMaxCurvX(i);  % longitude 
+        Data(i).Latitude = handles.geovar.newMaxCurvY(i);  % latitude attribute
+        Data(i).Longitude = handles.geovar.newMaxCurvX(i);  % longitude attribute
         Data(i).ID  = i;  
     end
+    shapewrite(Data, strcat(path, file))
+    
 end
 
 waitbar(1, hwait);

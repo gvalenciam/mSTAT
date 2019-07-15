@@ -18,10 +18,10 @@ end
 assignin('base','file',ReadVar.File);
 assignin('base','path',ReadVar.Path);
 
-
-
-if isempty(ReadVar.File)
+% if isempty(ReadVar.File)
     %empty 
+if(ReadVar.File == 0)
+    %No action
 else
     
     if iscell(ReadVar.File)%determinate the number of secondary channels
