@@ -96,10 +96,22 @@ end
 % Addition:
 % Some people like to get the data points closest to the zero crossing,
 % so we return these as well
-[CC,II] = min(abs([S(ind-1) ; S(ind) ; S(ind+1)]),[],1); 
-ind2 = ind + (II-2); %update indices 
-t0close = t(ind2); 
-s0close = S(ind2); 
+disp('IND');
+disp(ind);
+sizeInd = size(ind);
+
+if(sizeInd(1) == 1 && sizeInd(2) == 1)
+    [CC,II] = min(abs([S(ind-1) ; S(ind) ; S(ind+1)]),[],1); 
+    ind2 = ind + (II-2); %update indices 
+    t0close = t(ind2); 
+    s0close = S(ind2); 
+end
+
+% [CC,II] = min(abs([S(ind-1) ; S(ind) ; S(ind+1)]),[],1); 
+% ind2 = ind + (II-2); %update indices 
+% t0close = t(ind2); 
+% s0close = S(ind2); 
+
 %This is where patch begins
 % --- hwz 2008-08-26 
 % make it work for data starting/ending with a zero crossing! 

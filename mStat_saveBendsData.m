@@ -20,7 +20,7 @@ fprintf(fid,'\n');
 
 waitbar(1/3, hwait);
 
-dataHeaders = ["Bend ID", "Sinuosity", "Arc Wavelength", "Wavelength", "Amplitude", "Downstream length", "Upstream length"];
+dataHeaders = ["Bend ID", "Sinuosity", "Arc Wavelength", "Wavelength", "Amplitude", "Downstream length", "Upstream length", "Condition"];
 
 for i = 1:length(dataHeaders)
     fprintf(fid,'%s',dataHeaders(1,i));
@@ -43,6 +43,8 @@ for i = 1:geovar.nBends
     if (isnan(geovar.downstreamSlength(i)) || geovar.downstreamSlength(i) <= 0); fprintf(fid,'%s',"0000.0000"); else; fprintf(fid,'%s',convertCharsToStrings(num2str(geovar.downstreamSlength(i)))); end
     fprintf(fid,'\t\t\t');
     if (isnan(geovar.upstreamSlength(i)) || geovar.upstreamSlength(i) <= 0); fprintf(fid,'%s',"0000.0000"); else; fprintf(fid,'%s',convertCharsToStrings(num2str(geovar.upstreamSlength(i)))); end
+    fprintf(fid,'\t\t\t');
+    fprintf(fid,'%s',geovar.condition{i});
     fprintf(fid,'\n');
 end
 
@@ -52,12 +54,14 @@ fprintf(fid,'\n\n');
 
 waitbar(2/3, hwait);
 
-meanDataHeaders = ["Sinuosity", "Arc_Wavelength", "Wavelength", "Amplitude"];
+meanDataHeaders = ["Sinuosity", "Arc_Wavelength", "Wavelength", "Amplitude", "Condition"];
 
 for i = 1:length(meanDataHeaders)
     fprintf(fid,'%s',meanDataHeaders(1,i));
     fprintf(fid,'\t\t');
 end
+
+[s,~,j] = unique(geovar.condition);
 
 fprintf(fid,'\n');
 
@@ -68,6 +72,8 @@ fprintf(fid,'\t\t');
 fprintf(fid,'%s',convertCharsToStrings(round(nanmean(geovar.wavelengthOfBends), 2)));
 fprintf(fid,'\t\t');
 fprintf(fid,'%s',convertCharsToStrings(round(nanmean(geovar.amplitudeOfBends), 2)));
+fprintf(fid,'\t\t');
+fprintf(fid,'%s', s{mode(j)});
 fprintf(fid,'\n');
 
 waitbar(1, hwait);

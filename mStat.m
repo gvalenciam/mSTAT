@@ -163,13 +163,13 @@ if isempty(lastPath)
 end
 
 %River Average Width input mode (Comment and uncomment test)
-flagAverageWidth = 'manual';
-%flagAverageWidth = 'auto';
+%flagAverageWidth = 'manual';
+flagAverageWidth = 'auto';
 handles.flagAverageWidth = flagAverageWidth;
 
 %mSTAT plot flag (Comment and uncomment test)
-%handles.plotFlag = 'no_plot';
-handles.plotFlag = 'plot';
+handles.plotFlag = 'no_plot';
+%handles.plotFlag = 'plot';
 
 %Save variables in handles
 guidata(hObject, handles);
@@ -184,7 +184,8 @@ if ReadVar.Path ~= 0
     lastPath = ReadVar.Path;
 end
   
-if ReadVar.File == 0
+% if ReadVar.File == 0
+if isempty(ReadVar.File)
     %No action
 else            
     
@@ -217,8 +218,13 @@ else
             guidata(hObject, handles);
             set_enable(handles,'loadfiles');
             
+            %Write and store the width
+            set(handles.widthinput, 'String', handles.width);
+            setappdata(0,'width', handles.width);
+        
             %Read selector (Method of calculate Infletion or valley line)
-            sel = get(handles.selector,'Value');
+            %sel = get(handles.selector,'Value');
+            sel = 2;
             
             %Write the level
             set(handles.decompositionparameter, 'String', level);
@@ -237,6 +243,11 @@ else
         
         for i = 1:handles.numFile
         
+            [s,~,k] = unique(handles.geovar{i}.condition);
+            
+            assignin('base','s',s);
+            assignin('base','k',k);
+            
             tableValues = [cell2mat({handles.geovar{i}.nBends}), cell2mat({round(nanmean(handles.geovar{i}.sinuosityOfBends),2)}), cell2mat({round(nanmean(handles.geovar{i}.lengthCurved),2)}), cell2mat({round(nanmean(handles.geovar{i}.wavelengthOfBends),2)}), cell2mat({round(nanmean(handles.geovar{i}.amplitudeOfBends),2)})];
             tableHeaders = ["numberBends", "Sinuosity", "Arc_Wavelength", "Wavelength", "Amplitude"];
 
@@ -252,7 +263,11 @@ else
                 fprintf(fid,'%.3f',tableValues(1,j));
                 fprintf(fid,'\n');
             end
-
+            
+            fprintf(fid,'%s',"Condition"); 
+            fprintf(fid,'\t');
+            fprintf(fid,'%s', s{mode(k)});
+            
             fclose(fid);
 
         end
@@ -291,7 +306,9 @@ else
         setappdata(0,'width', handles.width);
         
         %Read selector (Method of calculate Infletion or valley line)
-        sel = get(handles.selector,'Value');
+        %sel = get(handles.selector,'Value');
+        sel = 2;
+        guidata(hObject, handles);
         
         %Write the level
         set(handles.decompositionparameter, 'String', level);
@@ -1284,6 +1301,8 @@ end
 
 bend{length(indexOfIntersectionPoints) + 1} = [handles.geovar.equallySpacedX(indexOfIntersectionPoints(end):end) handles.geovar.equallySpacedY(indexOfIntersectionPoints(end):end)];
 
+assignin('base','bend',bend);
+
 hwait = waitbar(0,'Exporting bends...');
 
 %Open save file window (only shp file format for now)
@@ -1301,19 +1320,44 @@ else
     %Populate Geostruct
     [geoStruct(1:length(bend)).Geometry]  = deal('Line');
 
-    for i = 0:length(handles.geovar.sinuosityOfBends) - 1
-         
-        geoStruct(i+1).Sinuosity          = handles.geovar.sinuosityOfBends(i+1);
-        geoStruct(i+1).Arc_Wavelength     = handles.geovar.lengthCurved(i+1);
-        geoStruct(i+1).Amplitude          = handles.geovar.amplitudeOfBends(i+1);
-          
+    geoStruct(1).ID   = length(bend);
+    geoStruct(1).Lat  = bend{1}(:,2);
+    geoStruct(1).Lon  = bend{1}(:,1);
+    geoStruct(1).Sinuosity          = 0.0;
+    geoStruct(1).Arc_Wavelength     = 0.0;
+    geoStruct(1).Amplitude          = 0.0;
+    
+    geoStruct(end).ID   = 1;
+    geoStruct(end).Lat  = bend{end}(:,2);
+    geoStruct(end).Lon  = bend{end}(:,1);
+    geoStruct(end).Sinuosity          = 0.0;
+    geoStruct(end).Arc_Wavelength     = 0.0;
+    geoStruct(end).Amplitude          = 0.0;
+    
+    for i = 2:length(bend) - 1
+        
+        geoStruct(i).ID   = length(bend) - (i - 1);
+        geoStruct(i).Lat  = bend{i}(:,2);
+        geoStruct(i).Lon  = bend{i}(:,1);
+        geoStruct(i).Sinuosity          = handles.geovar.sinuosityOfBends(i-1);
+        geoStruct(i).Arc_Wavelength     = handles.geovar.lengthCurved(i-1);
+        geoStruct(i).Amplitude          = handles.geovar.amplitudeOfBends(i-1);
+        
     end
-      
-    for j = 0:length(bend) - 1
-        geoStruct(j+1).ID = length(bend) - j;
-        geoStruct(j+1).Lat                = bend{end-j}(:,2);
-        geoStruct(j+1).Lon                = bend{end-j}(:,1);
-    end
+    
+%     for i = 0:length(handles.geovar.sinuosityOfBends) - 1
+%          
+%         geoStruct(i+1).Sinuosity          = handles.geovar.sinuosityOfBends(i+1);
+%         geoStruct(i+1).Arc_Wavelength     = handles.geovar.lengthCurved(i+1);
+%         geoStruct(i+1).Amplitude          = handles.geovar.amplitudeOfBends(i+1);
+%           
+%     end
+%       
+%     for j = 0:length(bend) - 1
+%         geoStruct(j+1).ID   = length(bend) - j;
+%         geoStruct(j+1).Lat  = bend{end-j}(:,2);
+%         geoStruct(j+1).Lon  = bend{end-j}(:,1);
+%     end
     
     waitbar(2/3, hwait);
     

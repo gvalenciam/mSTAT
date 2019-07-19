@@ -89,14 +89,10 @@ else
             %read ascii
             ReadVar.xyCl=importdata(fullfile(ReadVar.Path,ReadVar.File{i}));
             if(strcmp(handles.flagAverageWidth, "auto") == 1)
-                ReadVar.xCoord{i} = ReadVar.xyCl(2:end,1);  %First column = latitude values (from second row to end)
-                ReadVar.yCoord{i} = ReadVar.xyCl(2:end,2);  %Second column = longitude values (from second row to end)
                 ReadVar.width{i} = ReadVar.xyCl(1,1);          %First row first column = river avg width 
-            else
-                ReadVar.xCoord{i} = ReadVar.xyCl(:,1);  
-                ReadVar.yCoord{i} = ReadVar.xyCl(:,2);  
             end
-            
+            ReadVar.xCoord{i} = ReadVar.xyCl(2:end,1);  %First column = latitude values (from second row to end)
+            ReadVar.yCoord{i} = ReadVar.xyCl(2:end,2);  %Second column = longitude values (from second row to end)
             ReadVar.utmzone{i}=[];%without data
 
 
@@ -199,8 +195,9 @@ else
                     ReadVar.yCoord{1} = ReadVar.xyCl(2:end,2);  %Second column = longitude values (from second row to end)
                     ReadVar.width = ReadVar.xyCl(1,1);          %First row first column = river avg width 
                 else
-                    ReadVar.xCoord{1} = ReadVar.xyCl(:,1);  
-                    ReadVar.yCoord{1} = ReadVar.xyCl(:,2);  
+                    ReadVar.xCoord{1} = ReadVar.xyCl(:,1);  %First column = latitude values (from second row to end)
+                ReadVar.yCoord{1} = ReadVar.xyCl(2:end,2);  %Second column = longitude values (from second row to end)
+                    
                 end
                 
                 ReadVar.utmzone{1}=[];%without data
