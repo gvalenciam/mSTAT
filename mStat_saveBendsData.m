@@ -1,7 +1,13 @@
-function mStat_saveBendsData(geovar)
+function mStat_saveBendsData(handles)
 
+assignin('base','geovar',handles.geovar);
+
+geovar = handles.geovar;
 hwait = waitbar(0,'Exporting Excel File...');
-[file,path] = uiputfile('*.txt','Save *.txt file');
+defaultName = convertCharsToStrings(strcat(handles.formatfileread(1), '.txt'));
+disp("DN");
+disp(defaultName);
+[file,path] = uiputfile('*.txt','Save *.txt file', defaultName);
 outfile = fullfile(path,file); 
 
 fid = fopen(outfile,'wt');
@@ -65,13 +71,13 @@ end
 
 fprintf(fid,'\n');
 
-fprintf(fid,'%s',convertCharsToStrings(round(nanmean(geovar.sinuosityOfBends), 2)));
+fprintf(fid,'%s',convertCharsToStrings(round(nanmean(geovar.sinuosityOfBends), 5)));
 fprintf(fid,'\t\t');
-fprintf(fid,'%s',convertCharsToStrings(round(nanmean(geovar.lengthCurved), 2)));
+fprintf(fid,'%s',convertCharsToStrings(round(nanmean(geovar.lengthCurved), 5)));
 fprintf(fid,'\t\t');
-fprintf(fid,'%s',convertCharsToStrings(round(nanmean(geovar.wavelengthOfBends), 2)));
+fprintf(fid,'%s',convertCharsToStrings(round(nanmean(geovar.wavelengthOfBends), 5)));
 fprintf(fid,'\t\t');
-fprintf(fid,'%s',convertCharsToStrings(round(nanmean(geovar.amplitudeOfBends), 2)));
+fprintf(fid,'%s',convertCharsToStrings(round(nanmean(geovar.amplitudeOfBends), 5)));
 fprintf(fid,'\t\t');
 fprintf(fid,'%s', s{mode(j)});
 fprintf(fid,'\n');

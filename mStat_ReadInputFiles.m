@@ -43,9 +43,16 @@ else
 
             S.X = S.X(~isnan(S.X))';
             S.Y = S.Y(~isnan(S.Y))';
+            
+%             [xCoordsUTM, yCoordsUTM,UTMZone] = deg2utm(Lat,Lon);
+%             ReadVar.xCoord{i} = xCoordsUTM;
+%             ReadVar.yCoord{i} = yCoordsUTM;
+%             ReadVar.utmzone{i} = UTMZone;
+            
             ReadVar.xCoord{i} = S.X;
             ReadVar.yCoord{i} = S.Y;
             ReadVar.utmzone{i}=[];
+            
             if(strcmp(handles.flagAverageWidth, "auto") == 1)
                 ReadVar.width{i} = S.width;   %Get the width value from the shp file 
             end
@@ -156,14 +163,24 @@ else
                 S = shaperead(strcat(ReadVar.Path,ReadVar.File));
                 sizeS = size(S);
                 assignin('base','S',S);
-                disp(S);
                
                 %Polyline Shapefile
                 
                 S.X = S.X(~isnan(S.X))';
                 S.Y = S.Y(~isnan(S.Y))';
+                
+%                 [xCoordsUTM, yCoordsUTM,UTMZone] = deg2utm(S.Y,S.X);
+%                 
+%                 ReadVar.xCoord{i} = xCoordsUTM;
+%                 ReadVar.yCoord{i} = yCoordsUTM;
+%                 ReadVar.utmzone{i} = UTMZone;
+            
                 ReadVar.xCoord{1} = S.X;
                 ReadVar.yCoord{1} = S.Y;
+                
+                assignin('base','Xcoords',S.X);
+                assignin('base','Ycoords',S.Y);
+                
                 ReadVar.utmzone{1}=[];
                 if(strcmp(handles.flagAverageWidth, "auto") == 1)
                     ReadVar.width = S.width;   %Get the width value from the shp file 

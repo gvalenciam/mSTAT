@@ -1,5 +1,5 @@
 %-----------------MEANDER STATISTICS TOOLBOX. MStaT------------------------
-%
+% 
 % Meander Statistics Toolbox (MStaT), is a packaging of codes developed on 
 % MATLAB, which allows the quantification of parameters dexscriptors of 
 % meandering channels (sinuosity, arc-wavelength, amplitude, curvature, 
@@ -163,13 +163,13 @@ if isempty(lastPath)
 end
 
 %River Average Width input mode (Comment and uncomment test)
-%flagAverageWidth = 'manual';
-flagAverageWidth = 'auto';
+flagAverageWidth = 'manual';
+%flagAverageWidth = 'auto';
 handles.flagAverageWidth = flagAverageWidth;
 
 %mSTAT plot flag (Comment and uncomment test)
-handles.plotFlag = 'no_plot';
-%handles.plotFlag = 'plot';
+%handles.plotFlag = 'no_plot';
+handles.plotFlag = 'plot';
 
 %Save variables in handles
 guidata(hObject, handles);
@@ -417,7 +417,7 @@ function savexlsDataCallback(~, ~, handles)
 mStat_savexlsx(handles.geovar)
 
 function saveBendsData(~, ~, handles)
-mStat_saveBendsData(handles.geovar)
+mStat_saveBendsData(handles)
 
 
 %Google Export
@@ -1320,14 +1320,16 @@ else
     %Populate Geostruct
     [geoStruct(1:length(bend)).Geometry]  = deal('Line');
 
-    geoStruct(1).ID   = length(bend);
+    geoStruct(1).ID   = 1;
+%     geoStruct(end).ID   = length(bend);
     geoStruct(1).Lat  = bend{1}(:,2);
     geoStruct(1).Lon  = bend{1}(:,1);
     geoStruct(1).Sinuosity          = 0.0;
     geoStruct(1).Arc_Wavelength     = 0.0;
     geoStruct(1).Amplitude          = 0.0;
     
-    geoStruct(end).ID   = 1;
+    geoStruct(end).ID   = length(bend);
+%     geoStruct(end).ID   = 1;
     geoStruct(end).Lat  = bend{end}(:,2);
     geoStruct(end).Lon  = bend{end}(:,1);
     geoStruct(end).Sinuosity          = 0.0;
@@ -1336,7 +1338,8 @@ else
     
     for i = 2:length(bend) - 1
         
-        geoStruct(i).ID   = length(bend) - (i - 1);
+%         geoStruct(i).ID   = length(bend) - (i - 1);
+        geoStruct(i).ID   = i;
         geoStruct(i).Lat  = bend{i}(:,2);
         geoStruct(i).Lon  = bend{i}(:,1);
         geoStruct(i).Sinuosity          = handles.geovar.sinuosityOfBends(i-1);

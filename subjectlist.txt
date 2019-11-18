@@ -1,0 +1,5 @@
+numberBends	8.000
+Sinuosity	1.110
+Arc_Wavelength	2946.180
+Wavelength	2710.640
+Amplitude	372.750
